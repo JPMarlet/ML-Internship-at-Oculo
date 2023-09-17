@@ -1,8 +1,11 @@
 # ML-Internship-at-Oculo
 
-This script takes as input raw imu and vicon csv files from the OxIOD dataset.
+Overview of OxIOD_Data_Formatting_Script.py:
 
-output --> csv formatted .txt files:
+
+Input -->    raw imu and vicon csv files from the OxIOD dataset.
+
+output -->   csv formatted .txt files:
 
 - - `my_timestamps_p.txt` VIO timestamps.
   - [t]
