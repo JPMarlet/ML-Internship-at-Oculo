@@ -9,14 +9,15 @@ output --> csv formatted .txt files:
   - Note: single column, skipped first 20 frames
 - `imu_measurements.txt` raw and calibrated IMU data
   - [t, acc_raw (3), acc_cal (3), gyr_raw (3), gyr_cal (3), has_vio] 
- - Note: calibration through VIO calibration states. The data has been interpolated evenly between images around 1000Hz. Every timestamp in my_timestamps_p.txt will have a corresponding timestamp in this file (has_vio==1). 
+ - Note: calibration through VIO calibration states. 
+    The data has been interpolated evenly between images around 1000Hz. 
+    Every timestamp in my_timestamps_p.txt will have a corresponding timestamp in this file (has_vio==1). 
 - `evolving_state.txt` ground truth (VIO) states at IMU rate.
   - [t, q_wxyz (4), p (3), v (3)]
   - Note: VIO state estimates with IMU integration. Timestamps are from raw IMU measurements.
 - `calib_state.txt` VIO calibration states at image rate (used in `data_io.py`)
   - [t, acc_scale_inv (9), gyr_scale_inv (9), gyro_g_sense (9), b_acc (3), b_gyr (3)]
-  - Note: Changing calibration states from VIO.
-- `atttitude.txt` AHRS attitude from IMU
+- `attitude.txt` AHRS attitude from IMU
   - [t, qw, qx, qy, qz]
 
 """
@@ -36,10 +37,10 @@ import csv
 
 
 def main():
-    imu_file_pattern = f'C:\\Users\\Admin\\Documents\\GitHub\\OxIOD\\OxIOD rest of Dataset, to avoid singular zerodivisionerror\\*\\data*\\raw\\imu*.csv'
+    imu_file_pattern = f'C:\\Users\\Admin\\Documents\\GitHub\\OxIOD\\OxIOD Dataset\\*\\data*\\raw\\imu*.csv'
     imu_files = glob.glob(imu_file_pattern)
 
-    for seq_number, imu_file in enumerate(imu_files, start=72):
+    for seq_number, imu_file in enumerate(imu_files):
         vicon_file = imu_file.replace('imu', 'vi')
         output_path = f'C:\\Users\\Admin\\Documents\\GitHub\\TLIO\\Input Data for gen_fb_data.py\\Dataset\\Sequence_{seq_number}'
 
@@ -337,15 +338,12 @@ def _interpolate_ox_vicon_quaternions(ox_imu_upsampled_data, quaternions, clippe
         - creating dictonary: ox_interpolated_vicon_data and adding components from interpolated_quaternions
           list into separate lists inside ox_interpolated_vicon_data
     """
-
     ox_interpolated_vicon_data = {'timestamps': ox_imu_upsampled_data['timestamps'], 
                                 'rotation_w': [], 'rotation_x': [], 'rotation_y': [], 'rotation_z': [],  
                                 'translation_x': [], 'translation_y': [],'translation_z': []}
 
 
     vicon_clipped_timestamps = clipped_ox_vicon_data['timestamps']
-
-
     
     for timestamp in ox_imu_upsampled_data['timestamps']:
         original_index = bisect.bisect(vicon_clipped_timestamps, timestamp) - 1
@@ -367,11 +365,6 @@ def _interpolate_ox_vicon_quaternions(ox_imu_upsampled_data, quaternions, clippe
         ox_interpolated_vicon_data['rotation_x'].append(slerped_quat.x)
         ox_interpolated_vicon_data['rotation_y'].append(slerped_quat.y)
         ox_interpolated_vicon_data['rotation_z'].append(slerped_quat.z)
-
-    #print(f"length of ox_interpolated_vicon_data['rotation_w']:{len(ox_interpolated_vicon_data['rotation_w'])}")
-    # print(f"length of ox_interpolated_vicon_data['rotation_x']:{len(ox_interpolated_vicon_data['rotation_x'])}")
-    # print(f"length of ox_interpolated_vicon_data['rotation_y']:{len(ox_interpolated_vicon_data['rotation_y'])}")
-    # print(f"length of ox_interpolated_vicon_data['rotation_z']:{len(ox_interpolated_vicon_data['rotation_z'])}")
 
     print("quaternions interpolated")
 
